@@ -1,5 +1,5 @@
 import { Inspection, InspectionStats } from '../types/inspection';
-import { CandidateModel } from '../types/model';
+import { CandidateModel, evaluateNfr } from '../types/model';
 
 const PART_TYPES = ['도어', '라디에이터 그릴', '루프사이드', '배선', '범퍼', '카울커버', '커넥터', '테일 램프', '프레임', '헤드 램프', '휀더'];
 const DEFECT_TYPES = ['스크래치', '외관 손상', '단차', '장착 불량', '고정 불량', '고정핀 불량', '연계 불량', '유격 불량', '체결 불량', '실링 불량', '헤밍 불량', '홀 변형'];
@@ -89,29 +89,29 @@ export const MOCK_STATS: InspectionStats = {
   ],
 };
 
+function withNfrEvaluation(model: Omit<CandidateModel, 'nfrStatus' | 'unmetReason'>): CandidateModel {
+  const { status, unmetReasons } = evaluateNfr(model.metrics);
+  return { ...model, nfrStatus: status, unmetReason: unmetReasons.length ? unmetReasons.join(', ') : undefined };
+}
+
 export const MOCK_MODELS: CandidateModel[] = [
-  {
+  withNfrEvaluation({
     id: 'swin-t-v1.3',
     name: 'Swin-T + FPN',
     metrics: { recall: 0.968, precision: 0.912, map50: 0.887, p95LatencyMs: 412, gpuMemoryGb: 6.1 },
-    nfrStatus: 'met',
     isApplied: true,
-  },
-  {
+  }),
+  withNfrEvaluation({
     id: 'resnet50-v1.0',
     name: 'ResNet-50 + FPN',
     note: 'Baseline',
     metrics: { recall: 0.941, precision: 0.92, map50: 0.861, p95LatencyMs: 355, gpuMemoryGb: 5.4 },
-    nfrStatus: 'unmet',
-    unmetReason: 'Recall',
     isApplied: false,
-  },
-  {
+  }),
+  withNfrEvaluation({
     id: 'mobilenetv3-v1.0',
     name: 'MobileNetV3-Large + FPN',
     metrics: { recall: 0.936, precision: 0.897, map50: 0.832, p95LatencyMs: 148, gpuMemoryGb: 2.9 },
-    nfrStatus: 'unmet',
-    unmetReason: 'Recall',
     isApplied: false,
-  },
+  }),
 ];

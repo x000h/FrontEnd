@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Inspection } from '../../types/inspection';
 import Badge from '../layout/Badge';
 import DefectOverlay from './DefectOverlay';
@@ -11,6 +12,7 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 export default function ResultPanel({ inspection, imageUrl }: { inspection: Inspection | null; imageUrl?: string }) {
+  const [showHeatmap, setShowHeatmap] = useState(true);
   const status = inspection?.processStatus ?? 'not_started';
   const judgement = inspection?.judgement ?? 'pending';
   const defects = inspection?.defects ?? [];
@@ -24,6 +26,11 @@ export default function ResultPanel({ inspection, imageUrl }: { inspection: Insp
           <h2>검사 결과</h2>
         </div>
         {status === 'processing' && <span className="processing-pill"><span />처리 중</span>}
+        {status === 'completed' && defects.length > 0 && (
+          <button className="ghost" onClick={() => setShowHeatmap((v) => !v)}>
+            {showHeatmap ? '판정 근거 숨기기' : '판정 근거 보기'}
+          </button>
+        )}
       </div>
 
       <DefectOverlay
@@ -32,6 +39,7 @@ export default function ResultPanel({ inspection, imageUrl }: { inspection: Insp
         defects={defects}
         imageUrl={imageUrl}
         placeholderOnly={!inspection || status === 'processing'}
+        showHeatmap={showHeatmap}
       />
 
       <div className="result-summary">

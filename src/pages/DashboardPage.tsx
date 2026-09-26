@@ -5,6 +5,7 @@ import TrendChart from '../components/stats/TrendChart';
 import HistoryTable from '../components/stats/HistoryTable';
 import { useInspectionHistory, useInspectionStats } from '../api/inspections';
 import { useCandidateModels } from '../api/models';
+import { NFR_THRESHOLDS } from '../types/model';
 import { HistoryFilters } from '../types/inspection';
 
 const RECENT_FILTERS: HistoryFilters = { periodDays: 7, judgement: 'all', defectType: 'all', partType: 'all' };
@@ -38,7 +39,10 @@ export default function DashboardPage() {
         <div className="panel model-status">
           <div className="panel-head"><div><div className="eyebrow">DEPLOYED MODEL</div><h2>운영 모델</h2></div><Badge kind={appliedModel ? 'pass' : 'wait'}>{appliedModel ? '연동 정상' : '선정 필요'}</Badge></div>
           <div className="model-name">{appliedModel?.name ?? '미선정'}</div>
-          <div className="result-row"><span>NFR-01·02</span><span>{appliedModel?.nfrStatus === 'met' ? '충족' : '—'}</span></div>
+          <div className="result-row"><span>요구조건 충족</span><span>{appliedModel?.nfrStatus === 'met' ? '충족' : '—'}</span></div>
+          <div style={{ fontSize: 11, color: 'var(--ink-soft)', margin: '-4px 0 6px' }}>
+            Recall≥{NFR_THRESHOLDS.minRecall * 100}% · Precision≥{NFR_THRESHOLDS.minPrecision * 100}% · p95≤{NFR_THRESHOLDS.maxP95LatencyMs}ms · GPU≤{NFR_THRESHOLDS.maxGpuMemoryGb}GB
+          </div>
           <div className="result-row"><span>Recall</span><span>{appliedModel ? `${(appliedModel.metrics.recall * 100).toFixed(1)}%` : '—'}</span></div>
           <button className="ghost full" onClick={() => navigate('/models')}>모델 비교 및 적용 상태 보기 →</button>
         </div>

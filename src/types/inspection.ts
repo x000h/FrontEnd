@@ -35,7 +35,9 @@ export interface InspectionStats {
 }
 
 export interface HistoryFilters {
-  periodDays: 7 | 30 | 9999;
+  periodDays: 7 | 30 | 9999 | 'custom';
+  startDate?: string; // YYYY-MM-DD, periodDays === 'custom'일 때 사용
+  endDate?: string;   // YYYY-MM-DD, periodDays === 'custom'일 때 사용
   judgement: 'all' | 'pass' | 'fail';
   defectType: 'all' | string;
   partType: 'all' | string;

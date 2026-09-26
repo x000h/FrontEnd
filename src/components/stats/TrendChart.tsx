@@ -3,7 +3,7 @@ interface Point { label: string; defectRate: number }
 export default function TrendChart({ trend }: { trend: Point[] }) {
   if (!trend.length) return null;
   const w = 640, h = 180, pad = { top: 18, right: 16, bottom: 30, left: 12 };
-  const maxRate = Math.max(...trend.map((t) => t.defectRate), 0.01) * 1.15;
+  const maxRate = Math.min(Math.max(...trend.map((t) => t.defectRate), 0.01) * 1.15, 1);
   const stepX = trend.length === 1 ? 0 : (w - pad.left - pad.right) / (trend.length - 1);
   const points = trend.map((t, i) => {
     const x = trend.length === 1 ? w / 2 : pad.left + i * stepX;

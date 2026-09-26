@@ -1,4 +1,4 @@
-import { CandidateModel } from '../../types/model';
+import { CandidateModel, NFR_THRESHOLDS } from '../../types/model';
 
 export default function ModelCompareTable({
   models,
@@ -11,6 +11,11 @@ export default function ModelCompareTable({
 }) {
   return (
     <div className="panel" style={{ overflowX: 'auto', marginBottom: 16 }}>
+      <div style={{ fontSize: 12, color: 'var(--ink-soft)', marginBottom: 10 }}>
+        탐지 성능 기준: Recall ≥ {NFR_THRESHOLDS.minRecall * 100}%, Precision ≥ {NFR_THRESHOLDS.minPrecision * 100}% (FN 최소화 우선)
+        {' · '}
+        처리·자원 기준: 이미지 처리 p95 ≤ {NFR_THRESHOLDS.maxP95LatencyMs}ms, 최대 GPU 메모리 ≤ {NFR_THRESHOLDS.maxGpuMemoryGb}GB
+      </div>
       <table className="mtable">
         <thead>
           <tr>
@@ -20,7 +25,7 @@ export default function ModelCompareTable({
             <th>mAP@0.5</th>
             <th>p95 지연</th>
             <th>GPU 메모리</th>
-            <th>NFR-01·02</th>
+            <th>요구조건 충족</th>
             <th>상태</th>
           </tr>
         </thead>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import DefectOverlay from '../components/inspect/DefectOverlay';
 import Badge from '../components/layout/Badge';
 import { Inspection } from '../types/inspection';
@@ -14,8 +14,18 @@ const DEFAULT_FILTERS: HistoryFilters = { periodDays: 30, judgement: 'all', defe
 export default function StatsPage() {
   const [filters, setFilters] = useState<HistoryFilters>(DEFAULT_FILTERS);
   const [selected, setSelected] = useState<Inspection | null>(null);
+  const [showHeatmap, setShowHeatmap] = useState(true);
   const { data: stats, isLoading: statsLoading } = useInspectionStats(filters);
   const { data: history, isLoading: historyLoading } = useInspectionHistory(filters);
+
+  useEffect(() => {
+    if (!selected) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSelected(null);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [selected]);
 
   return (
     <>
@@ -65,20 +75,32 @@ export default function StatsPage() {
 
       <div className="panel">
         <div className="panel-head"><div><div className="eyebrow">HISTORY</div><h2>검사이력</h2></div><span className="subtle-chip">{history?.length ?? 0} records</span></div>
-        {historyLoading ? <div className="state-msg">불러오는 중...</div> : <HistoryTable rows={history ?? []} onSelect={setSelected} />}
+        {historyLoading ? <div className="state-msg">불러오는 중...</div> : <HistoryTable rows={history ?? []} onSelect={(row) => { setSelected(row); setShowHeatmap(true); }} />}
       </div>
 
       {selected && (
-        <div className="detail-drawer panel">
-          <div className="panel-head"><div><div className="eyebrow">INSPECTION DETAIL</div><h2>{selected.id}</h2></div><button className="icon-button" onClick={() => setSelected(null)}>×</button></div>
-          <div className="detail-grid">
-            <DefectOverlay imageWidth={selected.imageWidth} imageHeight={selected.imageHeight} defects={selected.defects} />
-            <div className="detail-fields">
-              <div className="detail-result">{selected.judgement === 'fail' ? <Badge kind="fail">불량 (NG)</Badge> : <Badge kind="pass">정상 (OK)</Badge>}</div>
-              <div className="result-row"><span>검사시각</span><span>{selected.inspectedAt}</span></div>
-              <div className="result-row"><span>사용 모델</span><span>{selected.modelId}</span></div>
-              <div className="result-row"><span>탐지 건수</span><span>{selected.defects.length}</span></div>
-              {selected.defects.map((d, i) => <div className="detection-card" key={i}><strong>{d.type}</strong><span>Confidence {(d.confidence * 100).toFixed(1)}%</span><small>bbox [{d.bbox.join(', ')}]</small></div>)}
+        <div className="modal-backdrop" onClick={() => setSelected(null)}>
+          <div className="modal-panel panel" onClick={(e) => e.stopPropagation()}>
+            <div className="panel-head">
+              <div><div className="eyebrow">INSPECTION DETAIL</div><h2>{selected.id}</h2></div>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                {selected.defects.length > 0 && (
+                  <button className="ghost" onClick={() => setShowHeatmap((v) => !v)}>
+                    {showHeatmap ? '판정 근거 숨기기' : '판정 근거 보기'}
+                  </button>
+                )}
+                <button className="icon-button" onClick={() => setSelected(null)}>×</button>
+              </div>
+            </div>
+            <div className="detail-grid">
+              <DefectOverlay imageWidth={selected.imageWidth} imageHeight={selected.imageHeight} defects={selected.defects} showHeatmap={showHeatmap} />
+              <div className="detail-fields">
+                <div className="detail-result">{selected.judgement === 'fail' ? <Badge kind="fail">불량 (NG)</Badge> : <Badge kind="pass">정상 (OK)</Badge>}</div>
+                <div className="result-row"><span>검사시각</span><span>{selected.inspectedAt}</span></div>
+                <div className="result-row"><span>사용 모델</span><span>{selected.modelId}</span></div>
+                <div className="result-row"><span>탐지 건수</span><span>{selected.defects.length}</span></div>
+                {selected.defects.map((d, i) => <div className="detection-card" key={i}><strong>{d.type}</strong><span>Confidence {(d.confidence * 100).toFixed(1)}%</span><small>bbox [{d.bbox.join(', ')}]</small></div>)}
+              </div>
             </div>
           </div>
         </div>
