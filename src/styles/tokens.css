@@ -1,0 +1,23 @@
+:root {
+  --ink: #172033;
+  --ink-soft: #6d7788;
+  --line: #e6eaf0;
+  --panel: #ffffff;
+  --bg: #f7f9fc;
+  --blue: #2563eb;
+  --blue-dark: #1749b5;
+  --blue-dim: #edf4ff;
+  --amber: #b76a00;
+  --amber-dim: #fff5df;
+  --green: #0c8a68;
+  --green-dim: #e7f8f2;
+  --red: #d34242;
+  --red-dim: #fff0f0;
+  --canvas: #eef2f6;
+  --placeholder: #d6dce4;
+  --placeholder-2: #b7c0cc;
+}
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Pretendard, 'Noto Sans KR', sans-serif; }
+button, input, select { font: inherit; }
